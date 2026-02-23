@@ -88,9 +88,12 @@ document.addEventListener('click', (e) => {
   handleClick(e.clientX, e.clientY);
 });
 
-// Pass cursor position to stars for hover effect
+// Track cursor position for stars hover + reveal dwell
+let mouseX = -200, mouseY = -200;
 document.addEventListener('mousemove', (e) => {
-  stars.setCursorPos(e.clientX / width, e.clientY / height);
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  stars.setCursorPos(mouseX / width, mouseY / height);
 });
 
 // Animation loop
@@ -101,6 +104,7 @@ function animate(time) {
   stars.update(time);
   geometry.update(time);
   cursor.update(time);
+  reveal.checkHover(mouseX, mouseY, width, height, time);
   reveal.update(time);
 
   // Draw all layers

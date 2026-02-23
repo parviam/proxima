@@ -10,6 +10,8 @@ const STAGGER_DELAY = 40;       // ms between each paragraph fade-in
 const CLOSE_FADE = 400;         // ms for text to fade out
 const BEAM_RETRACT = 500;       // ms for beam to retract on close
 const HIT_RADIUS = 25;          // px click distance to trigger
+const HOVER_RADIUS = 30;        // px proximity for hover-dwell
+const HOVER_DWELL = 1500;       // ms of sustained hover to trigger open
 
 // States
 const CLOSED = 0;
@@ -28,6 +30,8 @@ export class Reveal {
     this.overlayOpacity = 0;     // 0-1
     this.overlay = null;
     this.paragraphs = [];
+    this.hoverStart = 0;         // timestamp when cursor entered bright star proximity
+    this.hovering = false;       // whether cursor is currently near the bright star
   }
 
   init(starField) {
@@ -105,6 +109,31 @@ export class Reveal {
     const dx = clickX - pos.x;
     const dy = clickY - pos.y;
     return (dx * dx + dy * dy) <= HIT_RADIUS * HIT_RADIUS;
+  }
+
+  // Called each frame with cursor position to track hover dwell
+  checkHover(cursorX, cursorY, viewportWidth, viewportHeight, time) {
+    if (!this.starField || !this.isClosed()) {
+      this.hovering = false;
+      return;
+    }
+
+    const pos = this.starField.getBrightStarScreenPos(viewportWidth, viewportHeight);
+    const dx = cursorX - pos.x;
+    const dy = cursorY - pos.y;
+    const near = (dx * dx + dy * dy) <= HOVER_RADIUS * HOVER_RADIUS;
+
+    if (near) {
+      if (!this.hovering) {
+        this.hovering = true;
+        this.hoverStart = time;
+      } else if (time - this.hoverStart >= HOVER_DWELL) {
+        this.open();
+        this.hovering = false;
+      }
+    } else {
+      this.hovering = false;
+    }
   }
 
   // Check if click is outside the text column
