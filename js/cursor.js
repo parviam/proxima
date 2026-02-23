@@ -5,9 +5,9 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').mat
 const IS_TOUCH = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 // Trail constants
-const TRAIL_MIN_DISTANCE = 40;
-const TRAIL_MIN_INTERVAL = 120;
-const TRAIL_MAX_POINTS = 8;
+const TRAIL_MIN_DISTANCE = 100;
+const TRAIL_MIN_INTERVAL = 350;
+const TRAIL_MAX_POINTS = 5;
 const TRAIL_POINT_LIFETIME = 3000;
 
 // Constellation constants

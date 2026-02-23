@@ -27,8 +27,8 @@ export class StarField {
     return {
       x: Math.random(),
       y: Math.random(),
-      vx: randomRange(-0.00008, 0.00008),
-      vy: randomRange(-0.00008, 0.00008),
+      vx: randomRange(-0.000015, 0.000015),
+      vy: randomRange(-0.000015, 0.000015),
       radius: randomRange(0.8, 1.8),
       opacity: 0,
       targetOpacity: randomRange(0.05, 0.9),
@@ -101,8 +101,8 @@ export class StarField {
       if (star.dying && star.opacity <= 0.01) {
         star.x = Math.random();
         star.y = Math.random();
-        star.vx = randomRange(-0.00008, 0.00008);
-        star.vy = randomRange(-0.00008, 0.00008);
+        star.vx = randomRange(-0.000015, 0.000015);
+        star.vy = randomRange(-0.000015, 0.000015);
         star.radius = randomRange(0.8, 1.8);
         star.phase = randomRange(0, Math.PI * 2);
         star.lifespan = randomRange(40000, 120000);
