@@ -34,7 +34,7 @@ canvas#cursor { z-index: 2; }
   justify-content: flex-end;
   padding: 3rem;
   pointer-events: none;
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: 'Jost', 'Helvetica Neue', sans-serif;
   font-weight: 300;
   color: #fff;
   text-transform: lowercase;
@@ -53,10 +53,182 @@ canvas#cursor { z-index: 2; }
   to { opacity: 0.85; }
 }
 
+/* Title dimming when reveal is open */
+.title {
+  transition: opacity 0.5s ease;
+}
+
+.title.dimmed {
+  opacity: 0.3 !important;
+}
+
+/* Reveal overlay */
+#reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: none;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Edge vignette for legibility */
+#reveal::before,
+#reveal::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+#reveal::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+}
+
+#reveal::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.reveal-scroll {
+  max-width: 640px;
+  width: 100%;
+  padding: 6rem 3rem 4rem;
+  overflow-y: auto;
+  font-family: 'Jost', 'Helvetica Neue', sans-serif;
+  font-weight: 300;
+  color: #fff;
+  font-size: 17px;
+  line-height: 1.9;
+  -webkit-overflow-scrolling: touch;
+  /* Subtle center column background for readability */
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(0, 0, 0, 0.35) 10%,
+    rgba(0, 0, 0, 0.45) 50%,
+    rgba(0, 0, 0, 0.35) 90%,
+    transparent
+  );
+}
+
+/* Hide scrollbar */
+.reveal-scroll::-webkit-scrollbar {
+  display: none;
+}
+.reveal-scroll {
+  scrollbar-width: none;
+}
+
+/* Scroll edge fades */
+.reveal-scroll {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 4rem,
+    black calc(100% - 2rem),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 4rem,
+    black calc(100% - 2rem),
+    transparent
+  );
+}
+
+.reveal-scroll > * {
+  opacity: 0;
+}
+
+.reveal-scroll > .fade-in {
+  animation: revealFadeIn 0.6s ease-out forwards;
+}
+
+@keyframes revealFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 0.82; transform: translateY(0); }
+}
+
+.reveal-scroll h2 {
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.reveal-scroll h2:first-child {
+  margin-top: 0;
+  font-size: 24px;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.5rem;
+}
+
+.reveal-scroll h2.fade-in {
+  animation: revealHeadingIn 0.6s ease-out forwards;
+}
+
+@keyframes revealHeadingIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 0.95; transform: translateY(0); }
+}
+
+.reveal-scroll p {
+  margin-bottom: 1.2rem;
+}
+
+.reveal-scroll .subtitle {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  margin-bottom: 2rem;
+}
+
+.reveal-scroll .subtitle.fade-in {
+  animation: revealFadeIn 0.8s ease-out forwards;
+}
+
+.reveal-scroll strong {
+  font-weight: 300;
+  opacity: 1;
+}
+
+.reveal-scroll em {
+  font-style: italic;
+}
+
+.reveal-end {
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  opacity: 0;
+}
+
+.reveal-end.fade-in {
+  animation: revealFadeIn 1s ease-out forwards;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .title {
     letter-spacing: 0.2em;
+  }
+
+  .reveal-scroll {
+    padding: 5rem 1.5rem 3rem;
+    font-size: 15px;
+  }
+
+  .reveal-scroll h2 {
+    font-size: 18px;
   }
 }
 
@@ -71,5 +243,20 @@ canvas#cursor { z-index: 2; }
 @media (prefers-reduced-motion: reduce) {
   .title {
     animation-duration: 0.01s;
+  }
+
+  .reveal-scroll > .fade-in {
+    animation: none;
+    opacity: 0.82;
+  }
+
+  .reveal-scroll h2.fade-in {
+    animation: none;
+    opacity: 0.95;
+  }
+
+  .reveal-end.fade-in {
+    animation: none;
+    opacity: 0.82;
   }
 }

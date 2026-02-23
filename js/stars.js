@@ -1,5 +1,5 @@
 // Star field — the foundation of the experience
-import { randomRange, clamp } from './math.js';
+import { randomRange, clamp, lerp } from './math.js';
 
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -8,6 +8,9 @@ export class StarField {
     this.stars = [];
     this.startTime = performance.now();
     this.frameCount = 0;
+    this.brightStar = null;
+    this.cursorX = -1;
+    this.cursorY = -1;
   }
 
   init(width, height) {
@@ -21,6 +24,28 @@ export class StarField {
     for (let i = 0; i < count; i++) {
       this.stars[i] = this._createStar();
     }
+
+    // The bright star — persistent, special, never dies
+    if (!this.brightStar) {
+      this.brightStar = {
+        x: 0.5,
+        y: 0.12,
+        baseRadius: 3.0,
+        radius: 3.0,
+        opacity: 0.95,
+        phase: 0,
+        hoverIntensity: 0,
+      };
+    }
+  }
+
+  getBrightStarScreenPos(w, h) {
+    return { x: this.brightStar.x * w, y: this.brightStar.y * h };
+  }
+
+  setCursorPos(x, y) {
+    this.cursorX = x;
+    this.cursorY = y;
   }
 
   _createStar() {
@@ -113,6 +138,23 @@ export class StarField {
         star.dying = false;
       }
     }
+
+    // Bright star breathing pulse
+    if (this.brightStar) {
+      const breath = REDUCED_MOTION ? 0 : Math.sin(time * 0.0015) * 0.5;
+      this.brightStar.radius = this.brightStar.baseRadius + breath;
+
+      // Hover intensity based on cursor proximity
+      if (this.cursorX >= 0) {
+        // Use approximate screen distance (assuming ~1000px viewport)
+        const dx = this.brightStar.x - this.cursorX;
+        const dy = this.brightStar.y - this.cursorY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const proximity = 1 - clamp(dist / 0.1, 0, 1); // normalized coords, ~100px range
+        const target = proximity > 0 ? proximity : 0;
+        this.brightStar.hoverIntensity = lerp(this.brightStar.hoverIntensity, target, 0.08);
+      }
+    }
   }
 
   getNearbyStars(px, py, radius, w, h) {
@@ -170,6 +212,62 @@ export class StarField {
         ctx.lineTo(sx, sy + crossLen);
         ctx.stroke();
       }
+    }
+
+    // Draw the bright star
+    if (this.brightStar) {
+      const bs = this.brightStar;
+      const bx = bs.x * width;
+      const by = bs.y * height;
+      const hover = bs.hoverIntensity;
+
+      // Radial halo
+      const haloRadius = 12 + hover * 6;
+      const haloOpacity = 0.08 + hover * 0.06;
+      const gradient = ctx.createRadialGradient(bx, by, 0, bx, by, haloRadius);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${haloOpacity})`);
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(bx, by, haloRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.globalAlpha = bs.opacity;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(bx, by, bs.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Extended cross-flare
+      const crossLen = bs.radius * 5 + 4 + hover * 8;
+      ctx.globalAlpha = bs.opacity * (0.3 + hover * 0.15);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(bx - crossLen, by);
+      ctx.lineTo(bx + crossLen, by);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(bx, by - crossLen);
+      ctx.lineTo(bx, by + crossLen);
+      ctx.stroke();
+
+      // Diagonal flares (shorter)
+      const diagLen = crossLen * 0.5;
+      ctx.globalAlpha = bs.opacity * (0.12 + hover * 0.08);
+      ctx.beginPath();
+      ctx.moveTo(bx - diagLen, by - diagLen);
+      ctx.lineTo(bx + diagLen, by + diagLen);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(bx + diagLen, by - diagLen);
+      ctx.lineTo(bx - diagLen, by + diagLen);
+      ctx.stroke();
     }
 
     ctx.globalAlpha = 1;

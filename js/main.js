@@ -2,6 +2,7 @@
 import { StarField } from './stars.js';
 import { GeometryField } from './geometry.js';
 import { Cursor } from './cursor.js';
+import { Reveal } from './reveal.js';
 
 // Create and configure a canvas with proper HiDPI scaling
 function createCanvas(id) {
@@ -48,10 +49,12 @@ sizeCanvas(cursorCanvas, cursorCtx, width, height, dpr);
 const stars = new StarField();
 const geometry = new GeometryField();
 const cursor = new Cursor();
+const reveal = new Reveal();
 
 stars.init(width, height);
 geometry.init(width, height);
 cursor.init(stars);
+reveal.init(stars);
 
 // Resize handler with debounce
 let resizeTimeout;
@@ -64,6 +67,32 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
+// Click handler for bright star / reveal
+function handleClick(x, y) {
+  if (reveal.isAnimating()) return;
+
+  if (reveal.isClosed()) {
+    // Only open when clicking the bright star
+    if (reveal.hitTest(x, y, width, height)) {
+      reveal.open();
+    }
+  } else if (reveal.isOpen()) {
+    // Close when clicking the star again or outside the column
+    if (reveal.hitTest(x, y, width, height) || reveal.isOutsideColumn(x, width)) {
+      reveal.close();
+    }
+  }
+}
+
+document.addEventListener('click', (e) => {
+  handleClick(e.clientX, e.clientY);
+});
+
+// Pass cursor position to stars for hover effect
+document.addEventListener('mousemove', (e) => {
+  stars.setCursorPos(e.clientX / width, e.clientY / height);
+});
+
 // Animation loop
 function animate(time) {
   requestAnimationFrame(animate);
@@ -72,11 +101,13 @@ function animate(time) {
   stars.update(time);
   geometry.update(time);
   cursor.update(time);
+  reveal.update(time);
 
   // Draw all layers
   stars.draw(starsCtx, width, height, time);
   geometry.draw(geometryCtx, width, height, time);
   cursor.draw(cursorCtx, width, height, time);
+  reveal.draw(cursorCtx, width, height, time);
 }
 
 requestAnimationFrame(animate);
