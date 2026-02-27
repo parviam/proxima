@@ -186,6 +186,21 @@ canvas#cursor { z-index: 2; }
   margin-bottom: 1.2rem;
 }
 
+.reveal-scroll .signature {
+  margin-top: 3rem;
+  opacity: 0;
+}
+
+.reveal-scroll .signature a {
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.reveal-scroll .signature a:hover {
+  border-bottom-color: rgba(255, 255, 255, 0.7);
+}
+
 .reveal-scroll .subtitle {
   font-size: 15px;
   letter-spacing: 0.05em;
